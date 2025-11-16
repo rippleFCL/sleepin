@@ -7,10 +7,10 @@ from alembic.config import Config
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from sleepin.database import get_db
-from sleepin.models.sleep_entry import SleepEntry
-from sleepin.models.sleep_counter import SleepCounter
-from sleepin.schemas import SleepEntryCreate, SleepIntervalData
+from database import get_db
+from models.sleep_entry import SleepEntry
+from models.sleep_counter import SleepCounter
+from schemas import SleepEntryCreate, SleepIntervalData
 
 
 @asynccontextmanager
@@ -54,7 +54,7 @@ async def log_sleep(sleep_data: SleepEntryCreate, db: Session = Depends(get_db))
     current_counter_value = counter.counter_value if counter else 0
     if counter_value < current_counter_value:
         current_counter_value = 0
-        
+
     if counter_value != 0:
         sleep_length = counter_value - current_counter_value
         previous_sleep_entry = db.query(SleepEntry).order_by(SleepEntry.sleep_end.desc()).first()

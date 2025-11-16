@@ -13,8 +13,8 @@ config = context.config
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from sleepin.database import Base
-from sleepin.models import *  # noqa: F401, F403
+from database import Base
+from models import *  # noqa: F401, F403
 
 target_metadata = Base.metadata
 

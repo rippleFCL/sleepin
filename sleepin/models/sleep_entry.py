@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from sleepin.database import Base
+from database import Base
 
 
 class SleepEntry(Base):
