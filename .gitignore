@@ -51,9 +51,6 @@ env/
 .DS_Store
 Thumbs.db
 
-# Poetry
-poetry.lock
-
 # Environment variables
 .env
 .env.local
