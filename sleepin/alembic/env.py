@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -6,7 +7,6 @@ from sqlalchemy import pool
 from alembic import context
 
 config = context.config
-
 
 
 # add your model's MetaData object here
@@ -19,6 +19,13 @@ from models import *  # noqa: F401, F403
 target_metadata = Base.metadata
 
 
+environment = os.environ.get("ENV", "prod").lower()
+
+
+if environment == "dev":
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./sleepin.db"
+else:
+    SQLALCHEMY_DATABASE_URL = "sqlite:////app/data/sleepin.db"
 
 
 def run_migrations_offline() -> None:
@@ -33,7 +40,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = SQLALCHEMY_DATABASE_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -52,16 +59,17 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    configuration = config.get_section(config.config_ini_section, {})
+    configuration["sqlalchemy.url"] = SQLALCHEMY_DATABASE_URL
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

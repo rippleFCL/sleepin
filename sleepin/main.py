@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.sleep_entry import SleepEntry
 from models.sleep_counter import SleepCounter
-from schemas import SleepEntryCreate, SleepIntervalData
+from schemas import SleepEntryData, SleepLogEntry, SleepIntervalData
 
 
 @asynccontextmanager
@@ -38,9 +38,31 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+@app.post("/sleep/set")
+def set_sleep(sleep_data: SleepEntryData, db: Session = Depends(get_db)):
+    """
+    Set sleep entry directly.
+    """
+    current_entry = db.query(SleepEntry).filter(
+        SleepEntry.awake_start == sleep_data.awake_start,
+        SleepEntry.sleep_start == sleep_data.sleep_start,
+        SleepEntry.sleep_end == sleep_data.sleep_end,
+    ).first()
+    if current_entry:
+        return {"message": "Sleep entry already exists"}
+    
+    new_entry = SleepEntry(
+        awake_start=sleep_data.awake_start,
+        sleep_start=sleep_data.sleep_start,
+        sleep_end=sleep_data.sleep_end,
+    )
+    db.add(new_entry)
+    db.commit()
+    db.refresh(new_entry)
+    return {"message": "Sleep entry set successfully"}
 
 @app.post("/sleep", status_code=200)
-async def log_sleep(sleep_data: SleepEntryCreate, db: Session = Depends(get_db)):
+async def log_sleep(sleep_data: SleepLogEntry, db: Session = Depends(get_db)):
     """
     Log a new sleep entry when you wake up.
     Tracks counter value in separate table and detects when counter resets to calculate actual sleep duration.
