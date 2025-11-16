@@ -34,4 +34,4 @@ EXPOSE 8000
 
 USER 1000:1000
 
-ENTRYPOINT [ "uvicorn", "main:api" ]
+ENTRYPOINT [ "uvicorn", "main:app" ]
